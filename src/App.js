@@ -29,7 +29,21 @@ const fetchPersonalBests = async () => {
     return response.json();
 };
 
+const fetchUserProfile = async () => {
+    const response = await fetch("https://api.monkeytype.com/users/ashutoshjha/profile", {
+        method: "GET",
+        headers: {
+            Authorization: `ApeKey ${apekey}`,
+        },
+    });
+    if (!response.ok) {
+        throw new Error("Network response was not ok");
+    }
+    return response.json();
+};
+
 const App = () => {
+    const [profile, setProfile] = useState(null);
     const [stats, setStats] = useState(null);
     const [bests, setBests] = useState(null);
     const [error, setError] = useState(null);
@@ -37,6 +51,8 @@ const App = () => {
     useEffect(() => {
         const loadData = async () => {
             try {
+                const userProfile = await fetchUserProfile();
+                setProfile(userProfile.data);
                 const userStats = await fetchUserStats();
                 setStats(userStats.data);
                 const personalBests = await fetchPersonalBests();
@@ -54,9 +70,25 @@ const App = () => {
 
     return (
         <div className="container">
-            <header>
+            <header>    
                 <h1>🐒MonkeyType User Stats🐒</h1>
             </header>
+            <section>
+                <div className="card">
+                    <div className="card__title">Profile</div>
+                    <div className="card__content">
+                        {profile ? (
+                            <ul>
+                                <p><strong>Name:</strong> {profile.name}</p>
+                                <p><strong>Banned:</strong> {profile.banned ? 'Yes' : 'No'}</p>
+                                <p><strong>Account Created:</strong> {new Date(profile.addedAt).toLocaleString()}</p>
+                            </ul>
+                        ) : (
+                            <p>Loading user profile...</p>
+                        )}
+                    </div>
+                </div>
+            </section>
             <section>
                 <div className="card">
                     <div className="card__title">User Stats</div>
